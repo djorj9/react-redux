@@ -1,10 +1,14 @@
 import { useSelector, useDispatch } from "react-redux";
 import { BsBookmarkStarFill, BsBookmarkStar } from "react-icons/bs";
-import { deliteBook, toggleFavorite } from "../../redux/books/actionCreators";
-import { selectTitleFilter, selectAuthorFilter, selectOnlyFavoriteFilter} from "../../redux/slices/filterSlice";
+import { deliteBook, toggleFavorite , selectBooks} from "../../redux/slices/booksSlice";
+import {
+  selectTitleFilter,
+  selectAuthorFilter,
+  selectOnlyFavoriteFilter,
+} from "../../redux/slices/filterSlice";
 import "./BookList.css";
 const BookList = () => {
-  const books = useSelector((state) => state.books);
+  const books = useSelector(selectBooks);
   const titleFilter = useSelector(selectTitleFilter);
   const authorFilter = useSelector(selectAuthorFilter);
   const onlyFavoriteFilter = useSelector(selectOnlyFavoriteFilter);
@@ -23,11 +27,23 @@ const BookList = () => {
     const matchesAuthor = book.author
       .toLowerCase()
       .includes(authorFilter.toLowerCase());
-      const matchesFavorite = onlyFavoriteFilter ? book.isFavorite : true
-    return  matchesTitle && matchesAuthor && matchesFavorite
-
-       
+    const matchesFavorite = onlyFavoriteFilter ? book.isFavorite : true;
+    return matchesTitle && matchesAuthor && matchesFavorite;
   });
+  const highlightMatch = (text, filter) => {
+    if (!filter) return text;
+    const regexp = new RegExp(`(${filter})`, "gi");
+    return text.split(regexp).map((substring, i) => {
+      if(substring.toLowerCase() === filter.toLowerCase()){
+        return (
+            <span key={i} className="highlight">
+              {substring}
+            </span>
+        )
+      }
+      return substring
+    })
+  };
   return (
     <div className="app-block book-list">
       <h2>Список книг</h2>
@@ -38,7 +54,8 @@ const BookList = () => {
           {filtredBooks.map((book, i) => (
             <li key={book.id}>
               <div className="book-info">
-                {++i}. {book.title} автор <strong> {book.author}</strong>
+                {++i}. {highlightMatch(book.title, titleFilter)} автор{" "}
+                <strong> {highlightMatch(book.author, authorFilter)}</strong>
               </div>
               <div className="book-actions">
                 <span onClick={() => handleToggleFavorite(book.id)}>
