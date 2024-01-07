@@ -1,11 +1,13 @@
 import { useSelector, useDispatch } from "react-redux";
 import { BsBookmarkStarFill, BsBookmarkStar } from "react-icons/bs";
 import { deliteBook, toggleFavorite } from "../../redux/books/actionCreators";
-import { selectTitleFilter} from "../../redux/slices/filterSlice";
+import { selectTitleFilter, selectAuthorFilter, selectOnlyFavoriteFilter} from "../../redux/slices/filterSlice";
 import "./BookList.css";
 const BookList = () => {
   const books = useSelector((state) => state.books);
   const titleFilter = useSelector(selectTitleFilter);
+  const authorFilter = useSelector(selectAuthorFilter);
+  const onlyFavoriteFilter = useSelector(selectOnlyFavoriteFilter);
   const dispatch = useDispatch();
 
   const handlerBookId = (id) => {
@@ -18,7 +20,13 @@ const BookList = () => {
     const matchesTitle = book.title
       .toLowerCase()
       .includes(titleFilter.toLowerCase());
-      return matchesTitle
+    const matchesAuthor = book.author
+      .toLowerCase()
+      .includes(authorFilter.toLowerCase());
+      const matchesFavorite = onlyFavoriteFilter ? book.isFavorite : true
+    return  matchesTitle && matchesAuthor && matchesFavorite
+
+       
   });
   return (
     <div className="app-block book-list">
@@ -30,7 +38,7 @@ const BookList = () => {
           {filtredBooks.map((book, i) => (
             <li key={book.id}>
               <div className="book-info">
-                {++i}. {book.title} від <strong> {book.author}</strong>
+                {++i}. {book.title} автор <strong> {book.author}</strong>
               </div>
               <div className="book-actions">
                 <span onClick={() => handleToggleFavorite(book.id)}>
